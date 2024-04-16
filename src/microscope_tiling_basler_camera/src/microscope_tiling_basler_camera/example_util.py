@@ -54,6 +54,7 @@ def resize_image(img: MatLike, scale: float):
     return cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
 
 
+# TODO: add warning for too many images
 def try_stitch_images(tiles: list[list[MatLike]], num_rows: int, scale: float = 1.0) -> None:
     """
         Attempts to stitch tiled images row by row using openCV's high level stitching API

@@ -1,0 +1,29 @@
+[project]
+name = "microscope_tiling_basler_camera"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Colby Sparks", email = "colby.sparks@fwee-colby.izaber.com"},
+]
+dependencies = [
+    "numpy>=1.26.4",
+    "pypylon>=3.0.1",
+    "opencv-python>=4.9.0.80",
+    "zaber-motion>=5.2.0",
+    "imutils>=0.5.4",
+]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+example = "python src/microscope_tiling_basler_camera/main.py"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "mypy>=1.9.0",
+]

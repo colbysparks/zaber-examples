@@ -11,6 +11,7 @@ BINNING_MODE_VERTICAL: str = "Sum"
 MAX_TIMEOUT_MS = 2000
 MAX_ATTEMPTS = 20
 
+
 class ImageCaptureError(RuntimeError):
     pass
 
