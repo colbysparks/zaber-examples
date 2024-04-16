@@ -2,13 +2,9 @@
 
 *By Colby Sparks*
 
-Often we want to capture high resolution images of samples which we cannot fit into a single camera frame.
-In situations like this it makes sense to create an image tileset: a collection of images which when joined
-form an ultra-high resolution representation of the sample in question.
+Often we want to capture high resolution images of samples which we cannot fit into a single camera frame. In situations like this it makes sense to create an image tileset: a collection of images which when joined form an ultra-high resolution representation of the sample in question.
 
-This example showcases a simple technique for creating an image tileset, allowing a user to specify the top left and bottom right corners of the region they'd like to scan, and also the desired percentage of overlap between am
-image and its horizontal and vertical neighbours. The example also illustrates how to control a Basler camera 
-using the pypylon API.
+This example showcases a simple technique for creating an image tileset, allowing a user to specify the top left and bottom right corners of the region they'd like to scan, and also the desired percentage of overlap between am image and its horizontal and vertical neighbours. The example also illustrates how to control a Basler camera using the pypylon API.
 
 ## Hardware Requirements
 The full example code experience requires a Zaber microscope and Basler camera + objective. If you would like to
@@ -26,20 +22,23 @@ The dependencies are listed in `pyproject.toml`.
 
 ## Configuration / Parameters
 Edit the following constants in the script to fit your setup before running the script:
+
+#### Required Params
+
 - `SERIAL_PORT`: the serial port that your device is connected to.
-For more information on how to identify the serial port,
-see [Find the right serial port name](https://software.zaber.com/motion-library/docs/guides/find_right_port).
-- `SAVE_FOLDER`: the folder in which the tiled images will be saved
-- `PIXEL_WIDTH_MICRONS`: real-world measurement for pixel width (estimated from pixel calibration)
-- `PIXEL_HEIGHT_MICRONS`: real-world measurement for pixel height (estimated from pixel calibration)
-- `CAMERA_ROTATION_RAD`: camera rotation on z axis (axis orthogonal to plane defined by xy stage)
+For more information on how to identify the serial port, see [Find the right serial port name](https://software.zaber.com/motion-library/docs/guides/find_right_port).
 - `TOP_LEFT`: top left point of sample region (can be copied directly from microscope app in zaber launcher)
 - `BOTTOM_RIGHT`: bottom right point of sample region (also can be copied)
-whatever your camera orientation, it must be true that `TOP_LEFT.x` <= `BOTTOM_RIGHT.x` and
-- `TOP_LEFT.y` > `BOTTOM_RIGHT.y` (ie. top left and top right with respect to microscope xy stage coords)
 - `OVERLAP_H`: desired decimal percentage of horizontal overlap between neighbouring tiles
 - `OVERLAP_V`: desired decimal percentage of vertical overlap between neighbouring tiles
-- `RUN_BEST_EFFORT_STITCHING`: attempt to stitch tiles together using openCV's Stitcher class (more on openCV's high level stitching API [here](https://docs.opencv.org/4.x/d8/d19/tutorial_stitcher.html))
+- `PIXEL_WIDTH_MICRONS`: measurement for pixel width in microns (determined by pixel calibration)
+- `PIXEL_HEIGHT_MICRONS`: measurement for pixel height in microns (determined by pixel calibration)
+- `CAMERA_ROTATION_RAD`: camera rotation around z axis--axis orthogonal to plane defined by xy stage--if your camera is well-aligned, it is totally fine to leave this value at 0
+__Note__: no matter the orientation of your camera and stage, it must be true that `TOP_LEFT.x` <= `BOTTOM_RIGHT.x` and `TOP_LEFT.y` >= `BOTTOM_RIGHT.y`
+
+#### Optional Params
+- `SAVE_FOLDER`: the folder in which the tiled images will be saved
+- `RUN_BEST_EFFORT_STITCHING`: program will try to stitch tiles together using openCV's Stitcher class (more on openCV's high level stitching API [here](https://docs.opencv.org/4.x/d8/d19/tutorial_stitcher.html))
 - `RUN_NAIVE_TILING`: concatenate tiles together into single image--this should only be used with 0 horizontal
 and vertical overlap
 
@@ -51,12 +50,51 @@ pdm init
 pdm run example
 ```
 
-# Explaining the Central concept
-This section is split into two parts, the first part details the Basler camera API, and the second explains at a high level.
+# Tiling Images with Zaber Microscope
+Tiling is an important process for developing a digital representation of a sample which is too large to be viewed as a whole in a single frame. While it may be convenient to simply change to a lower-resolution objective to bring the entire sample into the field of view, a user may want to view the sample at a much higher resolution.
+
+This example code exposes parameters for specifying the upper left and bottom right microscope stage coordinates of such a sample. Given these coordinates, it will generate a sequence of grid points based on the desired overlap between frames, then it will move along the points and capture a frame at each. It is important to have an accurate estimate of pixel size, so the code can accurately compute the real-world distance between each point to achieve the desired amount of overlap.
+
+| Sample Top Left | Sample Bottom Right |
+| :---: | :---: |
+| ![Image of top left point](img/top_left.png) | ![Image of bottom right point](img/bottom_right.png) |
+
+If we specify that we want 0.5 horizontal and vertical overlap between tiles, the tiling algorithm will generate a 3x4 grid over our sample. The following are the resulting images:
+
+| Column 1 | Column 2 | Column 3 |
+| :---: | :---: | :---: |
+| <img src="img/example_tiles/tile_0_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_0_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_0_2.png" style="max-width:150px; max-height:150px;"> |
+| <img src="img/example_tiles/tile_1_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_1_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_1_2.png" style="max-width:150px; max-height:150px;"> |
+| <img src="img/example_tiles/tile_2_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_2_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_2_2.png" style="max-width:150px; max-height:150px;"> |
+| <img src="img/example_tiles/tile_3_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_3_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_3_2.png" style="max-width:150px; max-height:150px;"> |
+
+The algorithm for generating the path is quite simple:
+- compute the size of a camera frame given the size of each pixel and camera resolution (note that the user doesn't have to specify camera resolution)
+- determine horizontal and vertical step length based on frame size and overlap
+- find the minimum number of steps needed to cover the area defined by `TOP_LEFT` and `BOTTOM_RIGHT`
+- generate list of gridpoints, taking camera rotation into account to improve image overlap
+
+All this logic is contained in `src/microscope_tiling_basler_camera/path_builder.py`. Additionally, the logic for controlling the Basler camera using `pypylon` API is contained in `src/microscope_tiling_basler_camera/path_builder.py`.
+
+#### Next Steps
+
+The image tileset can now be joined user any technique the user desires. In this example code, we provide two functions, one which creates an openCV stitching class and attempts to stitch the images together, and one which simply concatenates the tileset together.
+
+##### Stitching
+
+Stitching is a powerful technique for joining images, but its success depends very much on the quality of the image data being processed. We do not attempt to solve the problem of stitching in this example and instead provide this functionality of an example of how a user could integrate stitching into their own automation workflows. That said, there are some things that a user could do to improve the result of openCV's stitching pipeline:
+- ensure objective, camera and sample plate are clean
+- ensure consistent illumination across all tiled images
+- specify 'reasonable' overlap values: between 0.1 and 0.5 overlap depending on your use case (this depends on the sample, but in general adjacent images need to share salient features for the stitching pipeline to compute homography)
+
+If you'd like to try running the stitching pipeline, set `RUN_BEST_EFFORT_STITCHING` to true. The program will either print an error message indicating that stitching failed, or will save the stitched file as `best_effort_stitched_tiles.png`
+
+##### Naive Tiling
+
+If you would simply like to see how well your image tileset is aligned, set `RUN_NAIVE_TILING` to true and the example code will concatenate all images into a single image. The final image will be saved as `naive_tiled_image.png`
 
 Sometimes it is useful to reference snippets of code in your explanation.
 Use a [permanent link](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-a-permanent-link-to-a-code-snippet)
 to some lines of code in the repository after at least one commit, and GitHub will link directly to the snippet.
 
-## Optional Troubleshooting Tips or FAQ
-Can provide additional information as needed.
+<!-- ## Optional Troubleshooting Tips or FAQ -->
