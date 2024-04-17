@@ -4,14 +4,10 @@
 
 Often we want to capture high resolution images of samples which we cannot fit into a single camera frame. In situations like this it makes sense to create an image tileset: a collection of images which when joined form an ultra-high resolution representation of the sample in question.
 
-This example showcases a simple technique for creating an image tileset, allowing a user to specify the top left and bottom right corners of the region they'd like to scan, and also the desired percentage of overlap between am image and its horizontal and vertical neighbours. The example also illustrates how to control a Basler camera using the pypylon API.
+This example showcases a simple technique for creating an image tileset using the [Zaber Motion Library](https://software.zaber.com/motion-library/api/py) microscope API, allowing a user to specify the top left and bottom right corners of the region they'd like to scan, and also the desired percentage of overlap between am image and its horizontal and vertical neighbours. The example also illustrates how to control a Basler camera using the [pypylon API](https://github.com/basler/pypylon).
 
 ## Hardware Requirements
-The full example code experience requires a Zaber microscope and Basler camera + objective. If you would like to
-use a different camera, you can implement your own camera wrapper class following the example of the 
-`basler_camera_wrapper.py`
-
-The user must also provide pixel dimensions, as this example doesn't attempt to perform any sort of pixel calibration.
+The full example code experience requires a Zaber microscope and Basler camera + objective. If you would like to use a different camera, you can implement your own camera wrapper class following the example contained in [`basler_camera_wrapper.py`](src/microscope_tiling_basler_camera/basler_camera_wrapper.py)
 
 ## Dependencies / Software Requirements / Prerequisites
 The script uses `pdm` to manage virtual environment and dependencies:
@@ -42,15 +38,39 @@ __Note__: no matter the orientation of your camera and stage, it must be true th
 - `RUN_NAIVE_TILING`: concatenate tiles together into single image--this should only be used with 0 horizontal
 and vertical overlap
 
+#### Pixel Calibration
+
+This example doesn't attempt to perform any sort of automated pixel calibration, so the user must also provide pixel dimensions. More information on pixel calibration can be found [here](https://ibidi.com/img/cms/support/AN/AN22_Pixel_Size.pdf).
+
+#### Focus
+
+This example doesn't attempt to adjust focus while tiling. If your sample's height is uniform, then focus can be set manually from the basic controls or microscope app available in [Zaber Launcher](https://software.zaber.com/zaber-launcher/download).
+
+If your sample's height is non-uniform, then it would be worth looking at the [focus map](../microscope_autofocus/) and [autofocus examples](../microscope_autofocus/) in this repository. Logic for focussing the objective could be added below the call to `AxisGroup.move_absolute` in the `capture_images` function in main:
+
+```python
+# ...
+for idx_x, point in enumerate(grid_row):
+    plate.move_absolute(
+        Measurement(point[0], Units.LENGTH_MICROMETRES),
+        Measurement(point[1], Units.LENGTH_MICROMETRES),
+    )
+    # focus objective here given x, y coordinates here
+    # ...
+```
+
 ## Running the Script
-To run the script:
+Once everything has been configured, you can run the example:
+
 ```
 cd src/microscope_tiling_basler_camera/
-pdm init
+pdm install
 pdm run example
 ```
 
-# Tiling Images with Zaber Microscope
+The script will attempt to provide useful feedback for the user, and will raise AssertionError if anything isn't configured properly.
+
+# Tiling Images
 Tiling is an important process for developing a digital representation of a sample which is too large to be viewed as a whole in a single frame. While it may be convenient to simply change to a lower-resolution objective to bring the entire sample into the field of view, a user may want to view the sample at a much higher resolution.
 
 This example code exposes parameters for specifying the upper left and bottom right microscope stage coordinates of such a sample. Given these coordinates, it will generate a sequence of grid points based on the desired overlap between frames, then it will move along the points and capture a frame at each. It is important to have an accurate estimate of pixel size, so the code can accurately compute the real-world distance between each point to achieve the desired amount of overlap.
@@ -67,6 +87,9 @@ If we specify that we want 0.5 horizontal and vertical overlap between tiles, th
 | <img src="img/example_tiles/tile_1_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_1_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_1_2.png" style="max-width:150px; max-height:150px;"> |
 | <img src="img/example_tiles/tile_2_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_2_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_2_2.png" style="max-width:150px; max-height:150px;"> |
 | <img src="img/example_tiles/tile_3_0.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_3_1.png" style="max-width:150px; max-height:150px;"> | <img src="img/example_tiles/tile_3_2.png" style="max-width:150px; max-height:150px;"> |
+
+
+
 
 The algorithm for generating the path is quite simple:
 - compute the size of a camera frame given the size of each pixel and camera resolution (note that the user doesn't have to specify camera resolution)
