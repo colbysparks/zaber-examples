@@ -109,8 +109,15 @@ Stitching is a powerful technique for joining images, but its success depends ve
 - ensure objective, camera and sample plate are clean
 - ensure consistent illumination across all tiled images
 - specify 'reasonable' overlap values: between 0.1 and 0.5 overlap depending on your use case (this depends on the sample, but in general adjacent images need to share salient features for the stitching pipeline to compute homography)
+- only try to stitch together a 'reasonable' number of images: a user may have success stitching together many images (>20), but our stitching example only uses 12 images, for example
 
-If you'd like to try running the stitching pipeline, set `RUN_BEST_EFFORT_STITCHING` to true. The program will either print an error message indicating that stitching failed, or will save the stitched file as `best_effort_stitched_tiles.png`
+If you'd like to try running the stitching pipeline, set `RUN_BEST_EFFORT_STITCHING` to true. The program will either print an error message indicating that stitching failed, or will save the stitched file as `best_effort_stitched_tiles.png`. You can also stitch together the example tileset provided in this repository by entering the following command:
+
+```
+pdm run stitching-example
+```
+
+This will load all of the images from `./img/example_tiles`, run openCV's stitcher with the default configuration and save the newly stitched file as `stitching_example.png`.
 
 ### Naive Tiling
 

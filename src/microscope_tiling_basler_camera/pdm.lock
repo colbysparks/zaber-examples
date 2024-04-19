@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:4ca34ccd0a0435811b2c5675f9111002999720af7d1c6619a0a19dfb1e72894e"
+content_hash = "sha256:434ba20d15012daf35b525b42368584ad770260dab26a9843e65fd8db518733a"
 
 [[package]]
 name = "astroid"

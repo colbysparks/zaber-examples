@@ -18,6 +18,7 @@ license = {text = "MIT"}
 
 [tool.pdm.scripts]
 example = {call = "src.microscope_tiling_basler_camera.main:main"}
+stitching-example = {call = "src.microscope_tiling_basler_camera.main:stitching_example"}
 
 [tool.pdm]
 distribution = false

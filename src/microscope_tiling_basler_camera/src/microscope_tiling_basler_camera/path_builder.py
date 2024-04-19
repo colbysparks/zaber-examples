@@ -25,6 +25,7 @@ class PathBuilder:
         """Construct PathBuilder instance."""
         self._pixel_w_um = pixel_w_um
         self._pixel_h_um = pixel_h_um
+        self._rotation = camera_rotation
         self._rotation_matrix_2d = np.array(
             [
                 [np.cos(camera_rotation), -np.sin(camera_rotation)],
@@ -68,6 +69,7 @@ class PathBuilder:
         # get num steps and compute horizontal and vertical coverage
         step_x_um: float = (1.0 - overlap_h) * frame_width_um
         step_y_um: float = (1.0 - overlap_v) * frame_height_um
+        step_y_um = step_y_um / np.cos(self._rotation)  # adjust y step with rotation of camera
         steps_x, coverage_x = PathBuilder.get_steps_and_coverage(step_x_um, sample_area_width_um)
         steps_y, coverage_y = PathBuilder.get_steps_and_coverage(step_y_um, sample_area_height_um)
 

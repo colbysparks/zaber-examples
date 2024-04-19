@@ -1,12 +1,18 @@
 """Example utility function module."""
 
-import itertools
 import cv2
 import numpy as np
 from cv2.typing import MatLike
 from numpy.typing import NDArray
 from zaber_motion import Units
 from zaber_motion import UnitsAndLiterals
+
+CV2_ERR_DICT: dict[int, str] = {
+    cv2.STITCHER_OK: "STITCHER_OK",
+    cv2.STITCHER_ERR_NEED_MORE_IMGS: "STITCHER_ERR_NEED_MORE_IMGS",
+    cv2.STITCHER_ERR_HOMOGRAPHY_EST_FAIL: "STITCHER_ERR_HOMOGRAPHY_EST_FAIL",
+    cv2.STITCHER_ERR_CAMERA_PARAMS_ADJUST_FAIL: "STITCHER_ERR_CAMERA_PARAMS_ADJUST_FAIL",
+}
 
 
 def convert_length_to_microns(length: float, unit: UnitsAndLiterals) -> float:
@@ -74,11 +80,11 @@ def resize_image(img: MatLike, scale: float) -> MatLike:
     Returns:
         MatLike: resized image
     """
-    assert 0.0 >= scale <= 1.0, "scale must be on [0.0, 1.0]"
-    return cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+    assert 0.0 < scale <= 1.0, "scale must be on [0.0, 1.0]"
+    return cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
 
 
-def try_stitch_images(tiles: list[list[MatLike]], scale: float = 1.0) -> None:
+def try_stitch_images(tiles: list[MatLike], file_name: str, scale: float = 1.0) -> None:
     """
         Attempt to stitch tiled images row by row using openCV's high level stitching API.
 
@@ -86,29 +92,31 @@ def try_stitch_images(tiles: list[list[MatLike]], scale: float = 1.0) -> None:
 
     Args:
         tiles (list[list[MatLike]]): list of tile rows
-        num_rows: number of tile rows
+        file_name: name of file to be saved
         scale: decimal percentage representing scale of final image
     """
-    tiles_final: list[MatLike] = list(itertools.chain(*tiles))
     if scale < 1.0:
-        tiles_final = list(map(lambda img: resize_image(img, scale), tiles_final))
+        tiles = list(map(lambda img: resize_image(img, scale), tiles))
 
     stitcher = cv2.Stitcher.create(cv2.Stitcher_SCANS)
-    status, stitched_final = stitcher.stitch(tiles_final)
+    status, stitched_final = stitcher.stitch(tiles)
 
     if status == cv2.Stitcher_OK:
-        cv2.imwrite("best_effort_stitched_tiles.png", stitched_final)
+        cv2.imwrite(file_name, stitched_final)
     else:
-        print("cv2.Stitcher unable to stitch images. Returning.")
+        print(f"cv2.Stitcher failed with error code: {status}: {CV2_ERR_DICT[status]}.")
 
 
-def join_tiles(tiles: list[list[MatLike]], num_rows: int, scale: float = 1.0) -> None:
+def join_tiles(
+    tiles: list[list[MatLike]], num_rows: int, file_name: str, scale: float = 1.0
+) -> None:
     """
         Join tiles into single image.
 
     Args:
         tiles (list[MatLike]): list of tile rows
         num_rows: number of tile rows
+        file_name: name of file to be saved
         scale: decimal percentage representing scale of final image
     """
     tiled_rows = []
@@ -125,4 +133,4 @@ def join_tiles(tiles: list[list[MatLike]], num_rows: int, scale: float = 1.0) ->
     final_img: MatLike = tiled_rows[0]
     for i in range(1, len(tiled_rows)):
         final_img = cv2.vconcat([final_img, tiled_rows[i]])
-    cv2.imwrite("naive_tiled_image.png", final_img)
+    cv2.imwrite(file_name, final_img)

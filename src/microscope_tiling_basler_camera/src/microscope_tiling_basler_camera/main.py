@@ -1,6 +1,7 @@
 """Example code entry point."""
 
 import os
+import itertools
 import numpy as np
 import cv2
 
@@ -25,8 +26,8 @@ CAMERA_ROTATION_RAD: float = 0.045226578
 # TODO: reset point values to 0 after someone tests this example
 # TOP_LEFT and BOTTOM_RIGHT are np.array([x, y]) where xy are microscope plate coords
 # make sure to specify units
-TOP_LEFT: NDArray[np.float64] = np.array([51.6696875, 48.70765625])
-BOTTOM_RIGHT: NDArray[np.float64] = np.array([55.06625, 44.0253125])
+TOP_LEFT: NDArray[np.float64] = np.array([49.54265625, 48.34875])
+BOTTOM_RIGHT: NDArray[np.float64] = np.array([52.775, 43.6420312499])
 POINTS_UNITS: Units = Units.LENGTH_MILLIMETRES  # units for TOP_LEFT and BOTTOM_RIGHT
 OVERLAP_H: float = 0.5
 OVERLAP_V: float = 0.5
@@ -34,7 +35,11 @@ OVERLAP_V: float = 0.5
 # image capture
 SAVE_FOLDER: str = "tiles"
 RUN_BEST_EFFORT_STITCHING: bool = True
-RUN_NAIVE_TILING: bool = True
+RUN_NAIVE_TILING: bool = False
+
+BEST_EFFORT_STITCHING_FILENAME: str = "best_effort_stitched_tiles.png"
+RUN_NAIVE_TILING_FILENAME: str = "naive_tiled_image.png"
+STITCHING_EXAMPLE_FILENAME: str = "stitching_example.png"
 
 # non user-controlled params
 CENTRE: NDArray[np.float64] = TOP_LEFT + (BOTTOM_RIGHT - TOP_LEFT) / 2.0
@@ -79,13 +84,14 @@ def main() -> None:
 
         if RUN_BEST_EFFORT_STITCHING:
             try:
-                try_stitch_images(tiles, num_rows)
+                tiles_flattened: list[MatLike] = list(itertools.chain(*tiles))
+                try_stitch_images(tiles_flattened, BEST_EFFORT_STITCHING_FILENAME)
             except AssertionError as e:
                 print("Stitching failed with AssertionError: ", e)
             except RuntimeError as e:
                 print("Stitching failed with RuntimeError: ", e)
         if RUN_NAIVE_TILING:
-            join_tiles(tiles, num_rows)
+            join_tiles(tiles, num_rows, RUN_NAIVE_TILING_FILENAME)
 
 
 def capture_images(
@@ -131,8 +137,9 @@ def capture_images(
             else:
                 filename += f"/tile_{idx_y}_{len(grid_row) - idx_x - 1}.png"
             cv2.imwrite(filename, img)
+            print(f"Saved image with dimensions ({img.shape}) to tileset: {filename} ", filename)
 
-        if not idx_y & 1:
+        if idx_y & 1:
             tile_row.reverse()
         tiles.append(tile_row)
     return tiles
@@ -149,3 +156,23 @@ def check_user_specified_params() -> None:
         print("Warning: At least 0.1 horizontal and vertical overlap is recommended for stitching")
     if RUN_NAIVE_TILING and (OVERLAP_H > 0.0 or OVERLAP_V > 0.0):
         print("Warning: 0.0 overlap is suggested for naive tiling")
+
+
+def stitching_example() -> None:
+    """Run image stitching example with example image tileset."""
+    tiles_path: str = "./img/example_tiles"
+    print("Loading images from ", tiles_path)
+    example_tileset: list[MatLike] = []
+    sorted_filenames: list[str] = sorted(os.listdir(tiles_path))
+    for filename in sorted_filenames:
+        img_path: str = os.path.join(tiles_path, filename)
+        if os.path.isfile(img_path):
+            image: MatLike = cv2.imread(img_path)
+            if image is not None:
+                print(f"Loading image with dimensions ({image.shape}): {img_path} ")
+                example_tileset.append(image)
+            else:
+                print("Failed to find image: ", img_path)
+
+    print(f"Stitching {len(example_tileset)} images")
+    try_stitch_images(example_tileset, STITCHING_EXAMPLE_FILENAME)
