@@ -1,44 +1,34 @@
 [project]
 name = "microscope_tiling_basler_camera"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "Zaber Examples -- Microscope Tiling with Basler Camera"
 authors = [
-    {name = "Colby Sparks", email = "colby.sparks@fwee-colby.izaber.com"},
+    {name = "Colby Sparks", email = "software@zaber.com"},
 ]
 dependencies = [
-    "numpy>=1.26.4",
-    "pypylon>=3.0.1",
-    "opencv-python>=4.9.0.80",
-    "zaber-motion>=5.2.0",
-    "imutils>=0.5.4",
+    "numpy==1.26.*",
+    "pypylon==3.0.*",
+    "opencv-python==4.9.0.*",
+    "zaber-motion==5.2.*",
+    "imutils==0.5.*",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"
 license = {text = "MIT"}
 
+[tool.pdm.scripts]
+start = {call = "microscope_tiling_basler_camera.main:main"}
 
 [tool.pdm]
 distribution = false
-
-[tool.pdm.scripts]
-example = "python src/microscope_tiling_basler_camera/main.py"
 
 [tool.pdm.dev-dependencies]
 dev = [
     "mypy>=1.9.0",
     "pylint>=3.1.0",
     "black>=24.4.0",
+    "pydocstyle>=6.3.0",
 ]
-pylint = []
 
 [tool.pylint."messages control"]
-# Disable the message, report, category or checker with the given id(s). You can
-# either give multiple identifiers separated by comma (,) or put this option
-# multiple times (only on the command line, not in the configuration file where
-# it should appear only once). You can also use "--disable=all" to disable
-# everything first and then re-enable specific checks. For example, if you want
-# to run only the similarities checker, you can use "--disable=all
-# --enable=similarities". If you want to run only the classes checker, but have
-# no Warning level messages displayed, use "--disable=all --enable=classes
-# --disable=W".
 disable = ["no-member", "too-many-arguments", "too-many-locals"]

@@ -1,29 +1,18 @@
-"""Example utility function module"""
+"""Example utility function module."""
 
 import itertools
 import cv2
 import numpy as np
 from cv2.typing import MatLike
 from numpy.typing import NDArray
-from zaber_motion import Units, Measurement
+from zaber_motion import Units
 from zaber_motion import UnitsAndLiterals
-
-
-def convert_measurement_to_microns(m: Measurement) -> float:
-    """
-        Convert arbitrary measurement length to length in microns
-    Args:
-        m: measurement (units must be Length)
-
-    Returns:
-        float: _description_
-    """
-    return convert_length_to_microns(m.value, m.unit)
 
 
 def convert_length_to_microns(length: float, unit: UnitsAndLiterals) -> float:
     """
-        Convert number from specified unit of length to microns
+        Convert number from specified unit of length to microns.
+
     Args:
         length: numeric type (numpy arrays are ok)
         unit: unit of measurement for length param
@@ -57,11 +46,11 @@ def convert_point_to_microns(
     point: NDArray[np.float64], units: UnitsAndLiterals
 ) -> NDArray[np.float64]:
     """
-        Converts 2d point to microns
+        Convert 2d point to microns.
 
     Args:
         point (NDArray[np.float64]): 2d point
-        units (UnitsAndLiterals): units of point to be converted to microns
+        units: units of point to be converted to microns
 
     Returns:
         NDArray: resulting point with x, y coords in microns
@@ -74,25 +63,13 @@ def convert_point_to_microns(
     )
 
 
-def is_even(num: int) -> bool:
-    """
-        Returns whether or not number is even
-
-    Args:
-        num (int): an integer value
-
-    Returns:
-        bool: true if num is even, false otherwise
-    """
-    return not num & 1
-
-
 def resize_image(img: MatLike, scale: float) -> MatLike:
     """
-        Resize image by scale
+        Resize image by scale.
+
     Args:
-        img (MatLike): image to be resized
-        scale (float): scale value between 0.0 and 1.0
+        img: image to be resized
+        scale: scale value between 0.0 and 1.0
 
     Returns:
         MatLike: resized image
@@ -103,15 +80,15 @@ def resize_image(img: MatLike, scale: float) -> MatLike:
 
 def try_stitch_images(tiles: list[list[MatLike]], scale: float = 1.0) -> None:
     """
-        Attempts to stitch tiled images row by row using openCV's high level stitching API
-        - this function is not guaranteed to succeed, but in general the more overlap the better
+        Attempt to stitch tiled images row by row using openCV's high level stitching API.
+
+        This function is not guaranteed to succeed, but in general the more overlap the better.
 
     Args:
         tiles (list[list[MatLike]]): list of tile rows
-        num_rows (int): number of tile rows
-        scale (float): decimal percentage representing scale of final image
+        num_rows: number of tile rows
+        scale: decimal percentage representing scale of final image
     """
-
     tiles_final: list[MatLike] = list(itertools.chain(*tiles))
     if scale < 1.0:
         tiles_final = list(map(lambda img: resize_image(img, scale), tiles_final))
@@ -122,16 +99,17 @@ def try_stitch_images(tiles: list[list[MatLike]], scale: float = 1.0) -> None:
     if status == cv2.Stitcher_OK:
         cv2.imwrite("best_effort_stitched_tiles.png", stitched_final)
     else:
-        print("status not ok!")
+        print("cv2.Stitcher unable to stitch images. Returning.")
 
 
 def join_tiles(tiles: list[list[MatLike]], num_rows: int, scale: float = 1.0) -> None:
     """
-        Joins tiles into single image
+        Join tiles into single image.
+
     Args:
         tiles (list[MatLike]): list of tile rows
-        num_rows (int): number of tile rows
-        scale (float): decimal percentage representing scale of final image
+        num_rows: number of tile rows
+        scale: decimal percentage representing scale of final image
     """
     tiled_rows = []
     for i in range(num_rows):

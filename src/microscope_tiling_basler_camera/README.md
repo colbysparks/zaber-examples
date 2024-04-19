@@ -4,10 +4,10 @@
 
 Often we want to capture high resolution images of samples which we cannot fit into a single camera frame. In situations like this it makes sense to create an image tileset: a collection of images which when joined form an ultra-high resolution representation of the sample in question.
 
-This example showcases a simple technique for creating an image tileset using the [Zaber Motion Library](https://software.zaber.com/motion-library/api/py) microscope API, allowing a user to specify the top left and bottom right corners of the region they'd like to scan, and also the desired percentage of overlap between am image and its horizontal and vertical neighbours. The example also illustrates how to control a Basler camera using the [pypylon API](https://github.com/basler/pypylon).
+This example showcases a simple technique for creating an image tileset using the [Zaber Motion Library](https://software.zaber.com/motion-library) microscope API, allowing a user to specify the top left and bottom right corners of the region they'd like to scan, and also the desired percentage of overlap between an image and its horizontal and vertical neighbours. The example also illustrates how to control a [Basler camera](https://www.baslerweb.com/en/cameras/) using the [pypylon API](https://github.com/basler/pypylon).
 
 ## Hardware Requirements
-The full example code experience requires a Zaber microscope and Basler camera + objective. If you would like to use a different camera, you can implement your own camera wrapper class following the example contained in [`basler_camera_wrapper.py`](src/microscope_tiling_basler_camera/basler_camera_wrapper.py)
+The full example code experience requires a [Zaber microscope](https://www.zaber.com/products/microscopes), Basler camera and objective. If you would like to use a different camera, you can implement your own camera wrapper class following the example contained in [`basler_camera_wrapper.py`](src/microscope_tiling_basler_camera/basler_camera_wrapper.py)
 
 ## Dependencies / Software Requirements / Prerequisites
 The script uses `pdm` to manage virtual environment and dependencies:
@@ -19,11 +19,11 @@ The dependencies are listed in `pyproject.toml`.
 ## Configuration / Parameters
 Edit the following constants in the script to fit your setup before running the script:
 
-#### Required Params
+### Required Params
 
-- `SERIAL_PORT`: the serial port that your device is connected to.
+- `SERIAL_PORT`: the serial port that your microscope is connected to.
 For more information on how to identify the serial port, see [Find the right serial port name](https://software.zaber.com/motion-library/docs/guides/find_right_port).
-- `TOP_LEFT`: top left point of sample region (can be copied directly from microscope app in zaber launcher)
+- `TOP_LEFT`: top left point of sample region (can be copied directly from microscope app in [Zaber Launcher](https://software.zaber.com/zaber-launcher/download))
 - `BOTTOM_RIGHT`: bottom right point of sample region (also can be copied)
 - `OVERLAP_H`: desired decimal percentage of horizontal overlap between neighbouring tiles
 - `OVERLAP_V`: desired decimal percentage of vertical overlap between neighbouring tiles
@@ -32,17 +32,17 @@ For more information on how to identify the serial port, see [Find the right ser
 - `CAMERA_ROTATION_RAD`: camera rotation around z axis--axis orthogonal to plane defined by xy stage--if your camera is well-aligned, it is totally fine to leave this value at 0
 __Note__: no matter the orientation of your camera and stage, it must be true that `TOP_LEFT.x` <= `BOTTOM_RIGHT.x` and `TOP_LEFT.y` >= `BOTTOM_RIGHT.y`
 
-#### Optional Params
+### Optional Params
 - `SAVE_FOLDER`: the folder in which the tiled images will be saved
 - `RUN_BEST_EFFORT_STITCHING`: program will try to stitch tiles together using openCV's Stitcher class (more on openCV's high level stitching API [here](https://docs.opencv.org/4.x/d8/d19/tutorial_stitcher.html))
 - `RUN_NAIVE_TILING`: concatenate tiles together into single image--this should only be used with 0 horizontal
 and vertical overlap
 
-#### Pixel Calibration
+### Pixel Calibration
 
 This example doesn't attempt to perform any sort of automated pixel calibration, so the user must also provide pixel dimensions. More information on pixel calibration can be found [here](https://ibidi.com/img/cms/support/AN/AN22_Pixel_Size.pdf).
 
-#### Focus
+### Focus
 
 This example doesn't attempt to adjust focus while tiling. If your sample's height is uniform, then focus can be set manually from the basic controls or microscope app available in [Zaber Launcher](https://software.zaber.com/zaber-launcher/download).
 
@@ -59,7 +59,7 @@ for idx_x, point in enumerate(grid_row):
     # ...
 ```
 
-## Running the Script
+### Running the Script
 Once everything has been configured, you can run the example:
 
 ```
@@ -97,13 +97,13 @@ The algorithm for generating the path is quite simple:
 - find the minimum number of steps needed to cover the area defined by `TOP_LEFT` and `BOTTOM_RIGHT`
 - generate list of gridpoints, taking camera rotation into account to improve image overlap
 
-All this logic is contained in `src/microscope_tiling_basler_camera/path_builder.py`. Additionally, the logic for controlling the Basler camera using `pypylon` API is contained in `src/microscope_tiling_basler_camera/path_builder.py`.
+All this logic is contained in `src/microscope_tiling_basler_camera/path_builder.py`. Additionally, the logic for controlling the Basler camera using `pypylon` API is contained in `src/microscope_tiling_basler_camera/basler_camera_wrapper.py`.
 
-#### Next Steps
+## Next Steps
 
 The image tileset can now be joined user any technique the user desires. In this example code, we provide two functions, one which creates an openCV stitching class and attempts to stitch the images together, and one which simply concatenates the tileset together.
 
-##### Stitching
+### Stitching
 
 Stitching is a powerful technique for joining images, but its success depends very much on the quality of the image data being processed. We do not attempt to solve the problem of stitching in this example and instead provide this functionality of an example of how a user could integrate stitching into their own automation workflows. That said, there are some things that a user could do to improve the result of openCV's stitching pipeline:
 - ensure objective, camera and sample plate are clean
@@ -112,12 +112,6 @@ Stitching is a powerful technique for joining images, but its success depends ve
 
 If you'd like to try running the stitching pipeline, set `RUN_BEST_EFFORT_STITCHING` to true. The program will either print an error message indicating that stitching failed, or will save the stitched file as `best_effort_stitched_tiles.png`
 
-##### Naive Tiling
+### Naive Tiling
 
 If you would simply like to see how well your image tileset is aligned, set `RUN_NAIVE_TILING` to true and the example code will concatenate all images into a single image. The final image will be saved as `naive_tiled_image.png`
-
-Sometimes it is useful to reference snippets of code in your explanation.
-Use a [permanent link](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-a-permanent-link-to-a-code-snippet)
-to some lines of code in the repository after at least one commit, and GitHub will link directly to the snippet.
-
-<!-- ## Optional Troubleshooting Tips or FAQ -->

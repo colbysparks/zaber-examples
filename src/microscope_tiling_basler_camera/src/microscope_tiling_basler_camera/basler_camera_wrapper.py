@@ -1,4 +1,4 @@
-"""Module for basler camera and helper types"""
+"""Module for basler camera and helper types."""
 
 import cv2
 import pypylon.pylon as py  # type: ignore
@@ -16,30 +16,32 @@ MAX_ATTEMPTS = 20
 
 class ImageCaptureError(RuntimeError):
     """
-        Error raised when camera fails to capture image
+    Error raised when camera fails to capture image.
+
     Args:
-        RuntimeError (RuntimeError): Parent class
+        RuntimeError: Parent class
     """
 
 
 class BaslerCameraWrapper:
     """
-    Wrapper for Basler pylon InstantCamera class
+    Wrapper for Basler pylon InstantCamera class.
+
     - More code examples using the pypylon library and InstantCamera API can be found here:
     https://github.com/basler/pypylon/tree/master/samples
-
-    - WARNING: __init__ will hang if Basler Pylon application is open
+    - WARNING: __init__ will hang if Basler Pylon application is open.
     """
 
     def __init__(self) -> None:
         """
-        BaslerCameraWrapper constructor
+        Construct BaslerCameraWrapper instance.
+
         - you may want to adjust settings depending on your camera and the lighting conditions
         it is operating in
         - you can copy any settings from the Basler Pylon application.
         """
-        self._tlf: py.TlFactory = py.TlFactory.GetInstance()
         try:
+            self._tlf: py.TlFactory = py.TlFactory.GetInstance()
             self._cam: py.InstantCamera = py.InstantCamera(self._tlf.CreateFirstDevice())
             self._cam.Open()
         except Exception as e:
@@ -74,8 +76,9 @@ class BaslerCameraWrapper:
 
     def grab_frame(self) -> MatLike:
         """
-            Capture and return latest frame from camera buffer:
-            you may want to adjust colour conversion settings depending on your camera
+            Capture and return latest frame from camera buffer.
+
+            - You may want to adjust colour conversion settings depending on your camera.
 
         Returns:
             MatLike: 24-bit BGR image converted from camera grayscale
@@ -98,7 +101,7 @@ class BaslerCameraWrapper:
 
     def get_frame_width(self) -> int:
         """
-            get camera frame width in pixels
+            Get camera frame width in pixels.
 
         Returns:
             int: frame width in pixels
@@ -107,7 +110,7 @@ class BaslerCameraWrapper:
 
     def get_frame_height(self) -> int:
         """
-            get camera frame height in pixels
+            Get camera frame height in pixels.
 
         Returns:
             int: frame height in pixels
@@ -116,7 +119,7 @@ class BaslerCameraWrapper:
 
     def get_binning_horizontal(self) -> int:
         """
-            get binning horizontal in pixels
+            Get binning horizontal in pixels.
 
         Returns:
             int: binning horizontal in pixels
@@ -125,7 +128,7 @@ class BaslerCameraWrapper:
 
     def get_binning_vertical(self) -> int:
         """
-            get binning vertical in pixels
+            Get binning vertical in pixels.
 
         Returns:
             int: binning vertical in pixels
