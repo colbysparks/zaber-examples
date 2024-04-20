@@ -145,19 +145,6 @@ def capture_images(
     return tiles
 
 
-def check_user_specified_params() -> None:
-    """Verify that user-specified params are valid and provide feedback."""
-    assert TOP_LEFT[0] <= BOTTOM_RIGHT[0], "It must be that TOP_LEFT.x <= BOTTOM_RIGHT.x"
-    assert TOP_LEFT[1] >= BOTTOM_RIGHT[1], "It must be that TOP_LEFT.y >= BOTTOM_RIGHT.y"
-
-    assert PIXEL_WIDTH_MICRONS > 0.0, "PIXEL_WIDTH_MICRONS must be greater than 0"
-    assert PIXEL_HEIGHT_MICRONS > 0.0, "PIXEL_WIDTH_MICRONS must be greater than 0"
-    if RUN_BEST_EFFORT_STITCHING and (OVERLAP_H < 0.1 or OVERLAP_V < 0.1):
-        print("Warning: At least 0.1 horizontal and vertical overlap is recommended for stitching")
-    if RUN_NAIVE_TILING and (OVERLAP_H > 0.0 or OVERLAP_V > 0.0):
-        print("Warning: 0.0 overlap is suggested for naive tiling")
-
-
 def stitching_example() -> None:
     """Run image stitching example with example image tileset."""
     tiles_path: str = "./img/example_tiles"
@@ -176,3 +163,19 @@ def stitching_example() -> None:
 
     print(f"Stitching {len(example_tileset)} images")
     try_stitch_images(example_tileset, STITCHING_EXAMPLE_FILENAME)
+
+
+def check_user_specified_params() -> None:
+    """Verify that user-specified params are valid and provide feedback."""
+    assert TOP_LEFT[0] <= BOTTOM_RIGHT[0], "It must be that TOP_LEFT.x <= BOTTOM_RIGHT.x"
+    assert TOP_LEFT[1] >= BOTTOM_RIGHT[1], "It must be that TOP_LEFT.y >= BOTTOM_RIGHT.y"
+    assert (
+        np.abs(CAMERA_ROTATION_RAD) <= np.pi / 4.0
+    ), "CAMERA_ROTATION_RAD should not be greater than 45°. Please adjust camera."
+
+    assert PIXEL_WIDTH_MICRONS > 0.0, "PIXEL_WIDTH_MICRONS must be greater than 0"
+    assert PIXEL_HEIGHT_MICRONS > 0.0, "PIXEL_WIDTH_MICRONS must be greater than 0"
+    if RUN_BEST_EFFORT_STITCHING and (OVERLAP_H < 0.1 or OVERLAP_V < 0.1):
+        print("Warning: At least 0.1 horizontal and vertical overlap is recommended for stitching")
+    if RUN_NAIVE_TILING and (OVERLAP_H > 0.0 or OVERLAP_V > 0.0):
+        print("Warning: 0.0 overlap is suggested for naive tiling")
