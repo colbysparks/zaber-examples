@@ -125,10 +125,7 @@ def capture_images(
                 Measurement(point[0], Units.LENGTH_MICROMETRES),
                 Measurement(point[1], Units.LENGTH_MICROMETRES),
             )
-            try:
-                img = camera.grab_frame()
-            except ImageCaptureError as e:
-                raise RuntimeError from e
+            img = camera.grab_frame()
 
             tile_row.append(img)
             filename: str = SAVE_FOLDER
