@@ -2,8 +2,9 @@
 
 *By Colby Sparks*
 
-This example demonstrates how to build and run a standalone MATLAB application which uses the Zaber Motion Library toolbox.
-The source code for the application is in `src/main.m`.
+This example demonstrates how to use MATLAB Compiler to build and run two kinds of MATLAB applications which use the
+Zaber Motion Library toolbox: a standalone console application (`src/main.m`) and a Windows desktop application with
+a simple UI for controlling a Zaber device (`src/desktop_app.m`).
 
 ## MATLAB Compiler
 
@@ -68,3 +69,48 @@ cd examples/util_matlab_compiler
 ```
 
 Where `<deployedMcrRoot>` is the path to your MATLAB install.
+
+## Windows Desktop Application
+
+MATLAB Compiler can also package a program as a Windows desktop application using the
+[compiler.build.standaloneWindowsApplication](https://www.mathworks.com/help/compiler/compiler.build.standalonewindowsapplication.html) function.
+Unlike a standalone application, a desktop application does not open a console window when launched,
+which makes it a better fit for GUI programs. Note that this build function is only supported on Windows.
+
+The application source in [src/desktop_app.m](./src/desktop_app.m) implements a simple UI which allows the user to
+connect to a Zaber device and:
+
+- Home the device
+- Move toward or away from the home position at a chosen velocity
+- Move to an absolute position in mm
+
+The serial port can be entered into the input box after startup. Optionally, you can edit the following constants
+at the top of `desktop_app.m`:
+
+- `DEVICE_ADDRESS`: The device address of the device you'd like to connect to
+- `AXIS_NUMBER`: The axis number of the axis you'd like to control on the device (`1` for most integrated devices)
+
+The [build_windows_desktop_app.m](./build_windows_desktop_app.m) script configures the build the same way as the
+standalone application, including assigning `zaber.motion.Helper.getCompilerDependencies()` to `AdditionalFiles`.
+It also sets the `ExecutableSplashScreen` option so that a splash image is displayed while the MATLAB Runtime loads,
+which can take several seconds.
+
+### Building the Application
+
+To build the desktop application, either:
+
+- Open the `util_matlab_compiler` directory in your MATLAB IDE and run `build_windows_desktop_app`.
+- In the command line, navigate to the `util_matlab_compiler` directory and run `matlab -batch build_windows_desktop_app`.
+
+The script places the packaged application in the `ZaberDesktopApp/output/build` folder.
+
+You can also run the app directly in MATLAB (on any platform) by navigating to the `src` directory and running `desktop_app`.
+
+### Running the Application
+
+To run the application, you can either locate the `ZaberDesktopApp.exe` file directly in File Explorer or use the following command in PowerShell:
+
+```shell
+cd examples/util_matlab_compiler
+.\ZaberDesktopApp\output\build\ZaberDesktopApp.exe
+```

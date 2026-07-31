@@ -7,6 +7,6 @@ buildOpts.OutputDir = fullfile(projectRoot, "ZaberStandaloneApp", "output", "bui
 buildOpts.Verbose = true;
 buildOpts.ExecutableName = "ZaberStandaloneApp";
 buildOpts.ExecutableVersion = "1.0.0";
-buildOpts.ExecutableIcon = fullfile(projectRoot, "img", "standalone_app_icon.png");
+buildOpts.ExecutableIcon = fullfile(projectRoot, "img", "app_icon.png");
 
 compiler.build.standaloneApplication(buildOpts);
