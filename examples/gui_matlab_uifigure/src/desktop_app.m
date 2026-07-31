@@ -50,7 +50,7 @@ function desktop_app()
 
     motionControls = [homeButton stopButton velocityField towardHomeButton ...
         awayFromHomeButton absPositionField moveAbsoluteButton];
-    set(motionControls, "Enable", "off");
+    set(motionControls, Enable="off");
 
     % Position readout
     positionLayout = uigridlayout(layout, [1 2], ColumnWidth={'fit', '1x'}, Padding=0);
@@ -84,32 +84,34 @@ function desktop_app()
 
             portField.Enable = "off";
             connectButton.Enable = "off";
-            set(motionControls, "Enable", "on");
+            set(motionControls, Enable="on");
             start(positionTimer);
             errorLabel.Text = "";
         catch err
+            if ~isempty(connection)
+                connection.close();
+                connection = [];
+            end
             errorLabel.Text = err.message;
         end
     end
 
     function onHome()
-        runCommand(@() stageAxis.home("waitUntilIdle", false));
+        runCommand(@() stageAxis.home(waitUntilIdle=false));
     end
 
     function onStop()
-        runCommand(@() stageAxis.stop("waitUntilIdle", false));
+        runCommand(@() stageAxis.stop(waitUntilIdle=false));
     end
 
     function onMoveVelocity(direction)
-        import zaber.motion.Units;
         velocity = direction * velocityField.Value;
         runCommand(@() stageAxis.moveVelocity(velocity, Units.VelocityMillimetresPerSecond));
     end
 
     function onMoveAbsolute()
-        import zaber.motion.Units;
         runCommand(@() stageAxis.moveAbsolute(absPositionField.Value, ...
-            Units.LengthMillimetres, "waitUntilIdle", false));
+            Units.LengthMillimetres, waitUntilIdle=false));
     end
 
     function runCommand(command)
@@ -122,7 +124,6 @@ function desktop_app()
     end
 
     function updatePosition()
-        import zaber.motion.Units;
         try
             position = stageAxis.getPosition(Units.LengthMillimetres);
             positionValue.Text = sprintf("%.3f mm", position);
@@ -135,8 +136,12 @@ function desktop_app()
     function onClose()
         stop(positionTimer);
         delete(positionTimer);
-        if ~isempty(connection)
-            connection.close();
+        try
+            if ~isempty(connection)
+                connection.close();
+            end
+        catch
+            % Ignore errors so the window always closes.
         end
         delete(fig);
     end
