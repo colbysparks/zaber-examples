@@ -10,18 +10,22 @@ function desktop_app()
     connection = [];
     stageAxis = [];
 
-    fig = uifigure(Name="Zaber Desktop App", Theme="dark");
+    % Image files are packaged via AdditionalFiles in the build script.
+    if isdeployed
+        logoSource = "splash_screen.png";
+        iconSource = "app_icon.png";
+    else
+        imgDir = fullfile(fileparts(mfilename("fullpath")), "..", "img");
+        logoSource = fullfile(imgDir, "splash_screen.png");
+        iconSource = fullfile(imgDir, "app_icon.png");
+    end
+
+    fig = uifigure(Name="Zaber Desktop App", Theme="dark", Icon=iconSource);
     fig.Position(3:4) = [480 490];
     fig.CloseRequestFcn = @(~, ~) onClose();
 
     layout = uigridlayout(fig, [6 1], RowHeight={80, 'fit', 'fit', 'fit', 'fit', 'fit'});
 
-    % Zaber logo (packaged via AdditionalFiles in the build script)
-    if isdeployed
-        logoSource = "splash_screen.png";
-    else
-        logoSource = fullfile(fileparts(mfilename("fullpath")), "..", "img", "splash_screen.png");
-    end
     uiimage(layout, ImageSource=logoSource);
 
     % Device info

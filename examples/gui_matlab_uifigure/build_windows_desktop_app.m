@@ -5,7 +5,8 @@ projectRoot = fileparts(mfilename('fullpath'));
 % Create target build options object, set build properties and build.
 buildOpts = compiler.build.StandaloneApplicationOptions(fullfile(projectRoot, "src", "desktop_app.m"));
 buildOpts.AdditionalFiles = [zaber.motion.Helper.getCompilerDependencies(), ...
-    fullfile(projectRoot, "img", "splash_screen.png")];
+    fullfile(projectRoot, "img", "splash_screen.png"), ...
+    fullfile(projectRoot, "img", "app_icon.png")];
 buildOpts.OutputDir = fullfile(projectRoot, "ZaberDesktopApp", "output", "build");
 buildOpts.Verbose = true;
 buildOpts.ExecutableName = "ZaberDesktopApp";
