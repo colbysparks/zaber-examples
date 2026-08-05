@@ -19,6 +19,7 @@ buildResults = compiler.build.standaloneWindowsApplication(buildOpts);
 % Create an installer for the app.
 installerOpts = compiler.package.InstallerOptions(buildResults);
 installerOpts.ApplicationName = "Zaber Desktop App";
+installerOpts.AuthorCompany = "Zaber Technologies Inc.";
 installerOpts.InstallerName = "ZaberDesktopAppInstaller";
 installerOpts.Version = "1.0.0";
 installerOpts.OutputDir = fullfile(projectRoot, "ZaberDesktopApp", "output", "installer");

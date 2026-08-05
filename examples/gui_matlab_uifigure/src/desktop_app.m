@@ -10,7 +10,7 @@ function desktop_app()
     connection = [];
     stageAxis = [];
 
-    % Image files are packaged via the AdditionalFiles in the build script.
+    % Image files are packaged via the AdditionalFiles option in the build script.
     if isdeployed
         logoSource = "zaber_logo.png";
         iconSource = "app_icon.png";

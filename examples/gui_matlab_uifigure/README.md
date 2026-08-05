@@ -63,17 +63,13 @@ To build the desktop application, either:
 
 The script places the packaged application in the `ZaberDesktopApp/output/build` folder.
 
-After building, the script also packages the app into an installer using
-[compiler.package.installer](https://www.mathworks.com/help/compiler/compiler.package.installer.html),
-placed in the `ZaberDesktopApp/output/installer` folder. Running the installer on a target machine installs
-the app along with the MATLAB Runtime, so end users don't need a MATLAB license.
+After building, the script also creates an installer for the app using [compiler.package.installer](https://www.mathworks.com/help/compiler/compiler.package.installer.html)
+and places it in the `ZaberDesktopApp/output/installer` folder.
+Running the installer on a target machine installs the app along with the MATLAB Runtime,
+so end users don't need a MATLAB license.
 The `RuntimeDelivery` option controls whether the installer downloads the runtime during
 installation (`"web"`, the default, which keeps the installer small) or embeds it (`"installer"`,
 which makes the installer several gigabytes but works offline).
 
-To run the application, you can either locate the `ZaberDesktopApp.exe` file directly in File Explorer or use the following command in PowerShell:
-
-```shell
-cd examples/gui_matlab_uifigure
-.\ZaberDesktopApp\output\build\ZaberDesktopApp.exe
-```
+To run the application, either run `ZaberDesktopApp.exe` directly from the `ZaberDesktopApp/output/build` folder,
+or run the installer and then launch the app like any other Windows application.
