@@ -31,7 +31,8 @@ In MATLAB, navigate to this example's `src` directory and run `desktop_app`. The
 ## About the Code
 
 This is an example of a [programmatic app](https://www.mathworks.com/help/matlab/creating_guis/create-and-run-a-simple-programmatic-app.html).
-If you are building a GUI with the App Designer tool, the generated code is structured differently but the same concepts apply.
+If you are building a GUI with the [App Designer](https://www.mathworks.com/products/matlab/app-designer.html) tool,
+the generated code will be structured differently but the same concepts apply.
 
 All motion commands are sent with `waitUntilIdle` set to `false` so the UI stays responsive while the axis moves.
 A timer is set up to poll the axis position and call `zaber.motion.Helper.pollEvents`,
