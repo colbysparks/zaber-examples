@@ -1,28 +1,18 @@
 # MATLAB GUI for Controlling a Zaber Device
 
-*By Colby Sparks*
-
 This example implements a simple MATLAB desktop app for controlling a single axis of a Zaber device.
-The UI is built programmatically with [uifigure](https://www.mathworks.com/help/matlab/ref/uifigure.html)
-and UI component functions, and lets the user:
+The UI is built programmatically with MATLAB's [uifigure](https://www.mathworks.com/help/matlab/ref/uifigure.html) API.
 
-- Connect to a device over a serial port
-- View basic device information and a live position readout
-- Home the axis or stop it at any time
-- Move toward or away from the home position at a chosen velocity
-- Move to an absolute position in mm
-
-The example also includes a build script for packaging the app as a Windows desktop application
-with MATLAB Compiler.
+<img src="img/screenshot.png" style="max-width:30rem;" alt="Screenshot">
 
 ## Hardware Requirements
 
-Any Zaber device with a linear axis, connected to the computer by serial port or USB.
+Any Zaber linear motion device connected to the computer by serial port or USB.
 
 ## Dependencies
 
 The app requires the [Zaber Motion Library toolbox](https://software.zaber.com/motion-library/docs/tutorials/install/matlab) (version `>=8.4.0`).
-Building the Windows desktop application additionally requires the [MATLAB Compiler](https://www.mathworks.com/products/compiler.html).
+Additionally, building the app as a Windows desktop application requires the [MATLAB Compiler](https://www.mathworks.com/products/compiler.html).
 
 This code example has been tested with MATLAB R2026a.
 
@@ -32,7 +22,7 @@ The serial port can be entered into the input box after startup. Optionally, you
 at the top of [src/desktop_app.m](./src/desktop_app.m):
 
 - `DEVICE_ADDRESS`: The device address of the device you'd like to connect to
-- `AXIS_NUMBER`: The axis number of the axis you'd like to control on the device (`1` for most integrated devices)
+- `AXIS_NUMBER`: The axis number of the axis you'd like to control on the device (1 for most integrated devices)
 
 ## Running the App
 
@@ -40,15 +30,17 @@ In MATLAB, navigate to this example's `src` directory and run `desktop_app`. The
 
 All of the UI callbacks are nested functions sharing the connection state of the parent function.
 Motion commands are sent with `waitUntilIdle` set to `false` so the UI stays responsive while the axis moves,
-and a timer polls the axis position to keep the readout current. Any command error is displayed at the
-bottom of the window.
+and a timer polls the axis position to keep the readout current.
+A lamp next to the position readout lights up green while the axis is moving: it is switched on after each
+motion command and switched off by subscribing to the connection's `Alert` events, which the device sends
+when movement completes.
+Any command error is displayed at the bottom of the window.
 
-## Building a Windows Desktop Application
+## Building the App as a Windows Desktop Application
 
-MATLAB Compiler can package a program as a Windows desktop application using the
-[compiler.build.standaloneWindowsApplication](https://www.mathworks.com/help/compiler/compiler.build.standalonewindowsapplication.html) function.
-Unlike a standalone console application, a desktop application does not open a console window when launched,
-which makes it a better fit for GUI programs. Note that this build function is only supported on Windows.
+MATLAB Compiler can package a MATLAB program as a Windows desktop application using the [compiler.build.standaloneWindowsApplication](https://www.mathworks.com/help/compiler/compiler.build.standalonewindowsapplication.html) function.
+Unlike a standalone console application, a desktop application does not open a console window when launched, which makes it a better fit for GUI programs.
+Note that this build function is only supported on Windows.
 
 The [build_windows_desktop_app.m](./build_windows_desktop_app.m) script configures the build, most importantly
 assigning `zaber.motion.Helper.getCompilerDependencies()` to the `AdditionalFiles` option so that the

@@ -64,10 +64,12 @@ function desktop_app()
         awayFromHomeButton absPositionField moveAbsoluteButton];
     set(motionControls, Enable="off");
 
-    % Position readout
-    positionLayout = uigridlayout(layout, [1 2], ColumnWidth={'fit', '1x'}, Padding=0);
+    % Position readout and motion indicator
+    positionLayout = uigridlayout(layout, [1 3], ColumnWidth={'fit', '1x', 'fit'}, Padding=0);
     uilabel(positionLayout, Text="Position:", FontWeight="bold");
     positionValue = uilabel(positionLayout, Text="?");
+    movingLamp = uilamp(positionLayout, Color=[0.5 0.5 0.5], ...
+        Tooltip="Green while the axis is moving");
 
     errorLabel = uilabel(layout, Text="", FontColor=[0.8 0 0], WordWrap="on");
 
@@ -86,6 +88,8 @@ function desktop_app()
             device = connection.getDevice(DEVICE_ADDRESS);
             device.identify();
             stageAxis = device.getAxis(AXIS_NUMBER);
+            connection.Alert.subscribe(@(event) onAlert(event));
+            setMoving(stageAxis.isBusy());
 
             statusValue.Text = "Connected";
             nameValue.Text = device.Name;
@@ -129,9 +133,25 @@ function desktop_app()
     function runCommand(command)
         try
             command();
+            setMoving(stageAxis.isBusy());
             errorLabel.Text = "";
         catch err
             errorLabel.Text = err.message;
+        end
+    end
+
+    function onAlert(event)
+        if event.DeviceAddress == DEVICE_ADDRESS && ...
+                (event.AxisNumber == 0 || event.AxisNumber == AXIS_NUMBER)
+            setMoving(event.Status == "BUSY");
+        end
+    end
+
+    function setMoving(moving)
+        if moving
+            movingLamp.Color = "green";
+        else
+            movingLamp.Color = [0.5 0.5 0.5];
         end
     end
 
