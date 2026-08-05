@@ -5,7 +5,7 @@ function desktop_app()
 
     DEVICE_ADDRESS = 1;
     AXIS_NUMBER = 1;
-    POSITION_POLL_PERIOD = 0.1; % seconds
+    CORE_LOOP_PERIOD = 0.1; % seconds
 
     connection = [];
     stageAxis = [];
@@ -73,8 +73,8 @@ function desktop_app()
 
     errorLabel = uilabel(layout, Text="", FontColor=[0.8 0 0], WordWrap="on");
 
-    positionTimer = timer(Period=POSITION_POLL_PERIOD, ExecutionMode="fixedSpacing", ...
-        TimerFcn=@(~, ~) updatePosition());
+    coreLoopTimer = timer(Period=CORE_LOOP_PERIOD, ExecutionMode="fixedSpacing", ...
+        TimerFcn=@(~, ~) onCoreLoopTick());
 
     function valueLabel = addInfoRow(parent, labelText, valueText)
         uilabel(parent, Text=labelText, FontWeight="bold");
@@ -101,7 +101,7 @@ function desktop_app()
             portField.Enable = "off";
             connectButton.Enable = "off";
             set(motionControls, Enable="on");
-            start(positionTimer);
+            start(coreLoopTimer);
             errorLabel.Text = "";
         catch err
             if ~isempty(connection)
@@ -155,8 +155,12 @@ function desktop_app()
         end
     end
 
-    function updatePosition()
+    function onCoreLoopTick()
         try
+            % Dispatch enqueued library events (alert events, etc.)
+            zaber.motion.Helper.pollEvents();
+
+            % Poll device and update position.
             position = stageAxis.getPosition(Units.LengthMillimetres);
             positionValue.Text = sprintf("%.3f mm", position);
         catch err
@@ -166,8 +170,8 @@ function desktop_app()
     end
 
     function onClose()
-        stop(positionTimer);
-        delete(positionTimer);
+        stop(coreLoopTimer);
+        delete(coreLoopTimer);
         try
             if ~isempty(connection)
                 connection.close();

@@ -34,6 +34,8 @@ and a timer polls the axis position to keep the readout current.
 A lamp next to the position readout lights up green while the axis is moving: it is switched on after each
 motion command and switched off by subscribing to the connection's `Alert` events, which the device sends
 when movement completes.
+The library queues events internally, so the timer callback also calls `zaber.motion.Helper.pollEvents()`
+to dispatch them to subscribers.
 Any command error is displayed at the bottom of the window.
 
 ## Building the App as a Windows Desktop Application
