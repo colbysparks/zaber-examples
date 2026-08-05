@@ -2,8 +2,8 @@
 
 *By Colby Sparks*
 
-This example demonstrates how to use MATLAB Compiler to build and run a standalone console application
-which uses the Zaber Motion Library toolbox.
+This example demonstrates how to build and run a standalone MATLAB application which uses the Zaber Motion Library toolbox.
+The source code for the application is in `src/main.m`.
 
 ## MATLAB Compiler
 
@@ -27,8 +27,6 @@ This code example has been tested with MATLAB R2026a.
 There are several different ways of configuring MATLAB Compiler to build a standalone application.
 In this example we use the [compiler.build.standaloneApplication](https://www.mathworks.com/help/compiler/compiler.build.standaloneapplication.html) function with [StandaloneApplicationOptions](https://www.mathworks.com/help/compiler/compiler.build.standaloneapplicationoptions.html) object.
 It is also possible to configure and build an application using the [Standalone Application Compiler](https://www.mathworks.com/help/compiler/create-application-using-standalone-application-compiler-app.html) in the MATLAB IDE.
-The build entry point passed to `StandaloneApplicationOptions` does not have to be a `*.m` script — it can
-also be an App Designer file (`*.mlapp`), among other file types.
 
 The [build_standalone_app.m](./build_standalone_app.m) script contains all the logic for packaging the Zaber Motion Library toolbox
 with the program contained in [src/main.m](./src/main.m). The most important thing to note is the following line where we assign
@@ -71,9 +69,3 @@ cd examples/util_matlab_compiler
 ```
 
 Where `<deployedMcrRoot>` is the path to your MATLAB install.
-
-## Packaging a GUI Program
-
-MATLAB Compiler can also package a GUI program as a Windows desktop application, which does not open
-a console window when launched. The [MATLAB GUI for Controlling a Zaber Device](../gui_matlab_uifigure/README.md)
-example implements a simple device control UI and packages it this way.
