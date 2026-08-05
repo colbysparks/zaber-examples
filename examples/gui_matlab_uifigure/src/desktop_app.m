@@ -64,12 +64,12 @@ function desktop_app()
         awayFromHomeButton absPositionField moveAbsoluteButton];
     set(motionControls, Enable="off");
 
-    % Position readout and motion indicator
-    positionLayout = uigridlayout(layout, [1 3], ColumnWidth={'fit', '1x', 'fit'}, Padding=0);
-    uilabel(positionLayout, Text="Position:", FontWeight="bold");
-    positionValue = uilabel(positionLayout, Text="?");
-    movingLamp = uilamp(positionLayout, Color=[0.5 0.5 0.5], ...
-        Tooltip="Green while the axis is moving");
+    % Live status: position readout and motion indicator
+    liveStatusLayout = uigridlayout(layout, [1 4], ColumnWidth={'fit', '1x', 'fit', 'fit'}, Padding=0);
+    uilabel(liveStatusLayout, Text="Position:", FontWeight="bold");
+    positionValue = uilabel(liveStatusLayout, Text="?");
+    uilabel(liveStatusLayout, Text="Device Busy:", FontWeight="bold");
+    movingLamp = uilamp(liveStatusLayout, Color=[0.5 0.5 0.5]);
 
     errorLabel = uilabel(layout, Text="", FontColor=[0.8 0 0], WordWrap="on");
 
