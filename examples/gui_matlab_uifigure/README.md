@@ -30,13 +30,12 @@ In MATLAB, navigate to this example's `src` directory and run `desktop_app`. The
 
 ## About the Code
 
-All of the UI callbacks are nested functions sharing the connection state of the parent function.
-Motion commands are sent with `waitUntilIdle` set to `false` so the UI stays responsive while the axis moves,
-and a timer polls the axis position to keep the readout updated.
-A lamp indicating the `BUSY` status of the device lights up green while the axis is moving: it is switched on after each
-motion command and switched off by subscribing to the connection's `Alert` events, which the device sends when movement completes.
-The library queues events internally, so the timer callback also calls `zaber.motion.Helper.pollEvents()` to dispatch them to subscribers.
-Any command error is displayed at the bottom of the window.
+All motion commands are sent with `waitUntilIdle` set to `false` so the UI stays responsive while the axis moves.
+A timer is set up to poll the axis position and call `zaber.motion.Helper.pollEvents`,
+which is necessary for propagating the alert events used by the lamp component.
+The lamp indicates the busy status of the device, lighting up green while the axis is moving: it is switched on after each
+motion command is sent and switched off when the program receives an alert callback whose status is NOT `'BUSY'`.
+If the program receives any kind of error, it is displayed at the bottom of the window.
 
 ## Building the App as a Windows Desktop Application
 
