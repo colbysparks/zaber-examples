@@ -5,12 +5,12 @@ function desktop_app()
 
     DEVICE_ADDRESS = 1;
     AXIS_NUMBER = 1;
-    CORE_LOOP_PERIOD = 0.1; % seconds
+    CORE_LOOP_PERIOD_SECONDS = 0.1;
 
     connection = [];
     stageAxis = [];
 
-    % Image files are packaged via AdditionalFiles in the build script.
+    % Image files are packaged via the AdditionalFiles in the build script.
     if isdeployed
         logoSource = "splash_screen.png";
         iconSource = "app_icon.png";
@@ -22,13 +22,13 @@ function desktop_app()
 
     fig = uifigure(Name="Zaber Desktop App", Theme="dark", Icon=iconSource);
     fig.Position(3:4) = [480 490];
-    fig.CloseRequestFcn = @(~, ~) onClose();
+    fig.CloseRequestFcn = @onClose;
 
     layout = uigridlayout(fig, [6 1], RowHeight={80, 'fit', 'fit', 'fit', 'fit', 'fit'});
 
     uiimage(layout, ImageSource=logoSource);
 
-    % Device info
+    % Device info panel
     infoPanel = uipanel(layout, Title="Device");
     infoLayout = uigridlayout(infoPanel, [5 2], ColumnWidth={'fit', '1x'}, RowSpacing=2);
     statusValue = addInfoRow(infoLayout, "Status:", "Not Connected");
@@ -40,16 +40,18 @@ function desktop_app()
     % Connection controls
     connectLayout = uigridlayout(layout, [1 2], ColumnWidth={'1x', 'fit'}, Padding=0);
     portField = uieditfield(connectLayout, "text", Placeholder="Enter serial port...");
-    connectButton = uibutton(connectLayout, Text="Connect", ButtonPushedFcn=@(~, ~) onConnect());
+    connectButton = uibutton(connectLayout, Text="Connect", ButtonPushedFcn=@onConnect);
 
     % Motion controls
     motionPanel = uipanel(layout, Title="Motion");
     motionLayout = uigridlayout(motionPanel, [3 3], ColumnWidth={'1x', '1x', '1x'});
-    homeButton = uibutton(motionLayout, Text="Home", ButtonPushedFcn=@(~, ~) onHome());
-    stopButton = uibutton(motionLayout, Text="Stop", ButtonPushedFcn=@(~, ~) onStop());
+    homeButton = uibutton(motionLayout, Text="Home", ButtonPushedFcn=@onHome);
+    stopButton = uibutton(motionLayout, Text="Stop", ButtonPushedFcn=@onStop);
     stopButton.Layout.Column = [2 3];
     velocityField = uieditfield(motionLayout, "numeric", Value=5, Limits=[0 Inf], ...
         ValueDisplayFormat="%.1f mm/s", Tooltip="Velocity");
+    % Anonymous function acts as a shim to adapt the (src, event) callback signature
+    % and pass a direction argument.
     towardHomeButton = uibutton(motionLayout, Text="Move Toward Home", ...
         ButtonPushedFcn=@(~, ~) onMoveVelocity(-1));
     awayFromHomeButton = uibutton(motionLayout, Text="Move Away From Home", ...
@@ -57,14 +59,14 @@ function desktop_app()
     absPositionField = uieditfield(motionLayout, "numeric", Value=0, Limits=[0 Inf], ...
         ValueDisplayFormat="%.3f mm", Tooltip="Target position");
     moveAbsoluteButton = uibutton(motionLayout, Text="Move To Position", ...
-        ButtonPushedFcn=@(~, ~) onMoveAbsolute());
+        ButtonPushedFcn=@onMoveAbsolute);
     moveAbsoluteButton.Layout.Column = [2 3];
 
     motionControls = [homeButton stopButton velocityField towardHomeButton ...
         awayFromHomeButton absPositionField moveAbsoluteButton];
     set(motionControls, Enable="off");
 
-    % Live status: position readout and motion indicator
+    % Live status updates
     liveStatusLayout = uigridlayout(layout, [1 4], ColumnWidth={'fit', '1x', 'fit', 'fit'}, Padding=0);
     uilabel(liveStatusLayout, Text="Position:", FontWeight="bold");
     positionValue = uilabel(liveStatusLayout, Text="?");
@@ -73,22 +75,22 @@ function desktop_app()
 
     errorLabel = uilabel(layout, Text="", FontColor=[0.8 0 0], WordWrap="on");
 
-    coreLoopTimer = timer(Period=CORE_LOOP_PERIOD, ExecutionMode="fixedSpacing", ...
-        TimerFcn=@(~, ~) onCoreLoopTick());
+    coreLoopTimer = timer(Period=CORE_LOOP_PERIOD_SECONDS, ExecutionMode="fixedSpacing", ...
+        TimerFcn=@onCoreLoopTick);
 
     function valueLabel = addInfoRow(parent, labelText, valueText)
         uilabel(parent, Text=labelText, FontWeight="bold");
         valueLabel = uilabel(parent, Text=valueText);
     end
 
-    function onConnect()
+    function onConnect(~, ~)
         try
             connection = Connection.openSerialPort(portField.Value);
             connection.enableAlerts();
             device = connection.getDevice(DEVICE_ADDRESS);
             device.identify();
             stageAxis = device.getAxis(AXIS_NUMBER);
-            connection.Alert.subscribe(@(event) onAlert(event));
+            connection.Alert.subscribe(@onAlert);
             setMoving(stageAxis.isBusy());
 
             statusValue.Text = "Connected";
@@ -112,11 +114,11 @@ function desktop_app()
         end
     end
 
-    function onHome()
+    function onHome(~, ~)
         runCommand(@() stageAxis.home(waitUntilIdle=false));
     end
 
-    function onStop()
+    function onStop(~, ~)
         runCommand(@() stageAxis.stop(waitUntilIdle=false));
     end
 
@@ -125,7 +127,7 @@ function desktop_app()
         runCommand(@() stageAxis.moveVelocity(velocity, Units.VelocityMillimetresPerSecond));
     end
 
-    function onMoveAbsolute()
+    function onMoveAbsolute(~, ~)
         runCommand(@() stageAxis.moveAbsolute(absPositionField.Value, ...
             Units.LengthMillimetres, waitUntilIdle=false));
     end
@@ -155,9 +157,9 @@ function desktop_app()
         end
     end
 
-    function onCoreLoopTick()
+    function onCoreLoopTick(~, ~)
         try
-            % Dispatch enqueued library events (alert events, etc.)
+            % Dispatch enqueued Zaber Motion Library events.
             zaber.motion.Helper.pollEvents();
 
             % Poll device and update position.
@@ -169,7 +171,7 @@ function desktop_app()
         end
     end
 
-    function onClose()
+    function onClose(~, ~)
         stop(coreLoopTimer);
         delete(coreLoopTimer);
         try
