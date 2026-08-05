@@ -1,10 +1,11 @@
 authors:
-  - Software Team
-date: 2026-07-31
-updated_date: 2026-07-31
+  - Colby Sparks
+date: 2026-08-04
+updated_date: 2026-08-04
 category: Graphical User Interface
 tags:
   - MATLAB
+  - MATLAB uifigure
   - Desktop Application
   - Windows
-picture: img/splash_screen.png
+picture: img/screenshot.png
