@@ -22,12 +22,6 @@ Additionally, in order to run the `matlab -batch` command below, MATLAB must be 
 
 This code example has been tested with MATLAB R2026a.
 
-## Configuration
-
-Edit the serial port name passed to `Connection.openSerialPort` in [src/standalone_app.m](./src/standalone_app.m)
-to match your setup. For more information on how to identify the serial port, see
-[Find the right serial port name](https://software.zaber.com/motion-library/docs/guides/communication/find_right_port).
-
 ## Standalone Application
 
 There are several different ways of configuring MATLAB Compiler to build a standalone application.
@@ -37,7 +31,7 @@ The build entry point passed to `StandaloneApplicationOptions` does not have to 
 also be an App Designer file (`*.mlapp`), among other file types.
 
 The [build_standalone_app.m](./build_standalone_app.m) script contains all the logic for packaging the Zaber Motion Library toolbox
-with the program contained in [src/standalone_app.m](./src/standalone_app.m). The most important thing to note is the following line where we assign
+with the program contained in [src/main.m](./src/main.m). The most important thing to note is the following line where we assign
 the return value from `zaber.motion.Helper.getCompilerDependencies` to the `AdditionalFiles` field of the build options object:
 
 ```matlab
