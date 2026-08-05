@@ -1,4 +1,4 @@
-function standalone_app()
+function main()
     % Simple example of using the Zaber Motion Library to move a device.
     import zaber.motion.Units;
     import zaber.motion.ascii.Connection;
