@@ -1,7 +1,7 @@
 # MATLAB GUI for Controlling a Zaber Device
 
 This example implements a simple MATLAB desktop app for controlling a single axis of a Zaber device.
-The UI is built programmatically with MATLAB's [uifigure](https://www.mathworks.com/help/matlab/ref/uifigure.html) API.
+The UI is built with MATLAB's [uifigure](https://www.mathworks.com/help/matlab/ref/uifigure.html) API.
 
 <img src="img/screenshot.png" style="max-width:30rem;" alt="Screenshot">
 
@@ -12,14 +12,14 @@ Any Zaber linear motion device connected to the computer by serial port or USB.
 ## Dependencies
 
 The app requires the [Zaber Motion Library toolbox](https://software.zaber.com/motion-library/docs/tutorials/install/matlab) (version `>=8.4.0`).
-Additionally, building the app as a Windows desktop application requires the [MATLAB Compiler](https://www.mathworks.com/products/compiler.html).
+Additionally, building the app as a Windows desktop application requires access to [MATLAB Compiler](https://www.mathworks.com/products/compiler.html).
 
 This code example has been tested with MATLAB R2026a.
 
 ## Configuration
 
-The serial port can be entered into the input box after startup. Optionally, you can edit the following constants
-at the top of [src/desktop_app.m](./src/desktop_app.m):
+The serial port can be entered into the input box after startup.
+Optionally, you can edit the following constants at the top of [src/desktop_app.m](./src/desktop_app.m):
 
 - `DEVICE_ADDRESS`: The device address of the device you'd like to connect to
 - `AXIS_NUMBER`: The axis number of the axis you'd like to control on the device (1 for most integrated devices)
@@ -28,14 +28,14 @@ at the top of [src/desktop_app.m](./src/desktop_app.m):
 
 In MATLAB, navigate to this example's `src` directory and run `desktop_app`. The app runs on any platform.
 
+## About the Code
+
 All of the UI callbacks are nested functions sharing the connection state of the parent function.
 Motion commands are sent with `waitUntilIdle` set to `false` so the UI stays responsive while the axis moves,
-and a timer polls the axis position to keep the readout current.
-A lamp next to the position readout lights up green while the axis is moving: it is switched on after each
-motion command and switched off by subscribing to the connection's `Alert` events, which the device sends
-when movement completes.
-The library queues events internally, so the timer callback also calls `zaber.motion.Helper.pollEvents()`
-to dispatch them to subscribers.
+and a timer polls the axis position to keep the readout updated.
+A lamp indicating the `BUSY` status of the device lights up green while the axis is moving: it is switched on after each
+motion command and switched off by subscribing to the connection's `Alert` events, which the device sends when movement completes.
+The library queues events internally, so the timer callback also calls `zaber.motion.Helper.pollEvents()` to dispatch them to subscribers.
 Any command error is displayed at the bottom of the window.
 
 ## Building the App as a Windows Desktop Application
