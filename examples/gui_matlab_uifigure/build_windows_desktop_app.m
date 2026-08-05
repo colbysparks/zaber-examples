@@ -14,4 +14,18 @@ buildOpts.ExecutableVersion = "1.0.0";
 buildOpts.ExecutableIcon = fullfile(projectRoot, "img", "app_icon.png");
 buildOpts.ExecutableSplashScreen = fullfile(projectRoot, "img", "splash_screen.png");
 
-compiler.build.standaloneWindowsApplication(buildOpts);
+buildResults = compiler.build.standaloneWindowsApplication(buildOpts);
+
+% Create an installer for the app.
+installerOpts = compiler.package.InstallerOptions(buildResults);
+installerOpts.ApplicationName = "Zaber Desktop App";
+installerOpts.InstallerName = "ZaberDesktopAppInstaller";
+installerOpts.Version = "1.0.0";
+installerOpts.OutputDir = fullfile(projectRoot, "ZaberDesktopApp", "output", "installer");
+installerOpts.InstallerIcon = fullfile(projectRoot, "img", "app_icon.png");
+installerOpts.InstallerSplash = fullfile(projectRoot, "img", "splash_screen.png");
+% RuntimeDelivery="web" keeps the installer small by downloading the MATLAB Runtime
+% during installation; use "installer" to embed the runtime instead.
+installerOpts.RuntimeDelivery = "web";
+
+compiler.package.installer(buildResults, Options=installerOpts);
