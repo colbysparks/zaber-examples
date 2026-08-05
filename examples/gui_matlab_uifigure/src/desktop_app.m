@@ -12,11 +12,11 @@ function desktop_app()
 
     % Image files are packaged via the AdditionalFiles in the build script.
     if isdeployed
-        logoSource = "splash_screen.png";
+        logoSource = "zaber_logo.png";
         iconSource = "app_icon.png";
     else
         imgDir = fullfile(fileparts(mfilename("fullpath")), "..", "img");
-        logoSource = fullfile(imgDir, "splash_screen.png");
+        logoSource = fullfile(imgDir, "zaber_logo.png");
         iconSource = fullfile(imgDir, "app_icon.png");
     end
 
