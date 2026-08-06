@@ -1,7 +1,5 @@
 # Packaging Zaber Motion Library with MATLAB Compiler
 
-*By Colby Sparks*
-
 This example demonstrates how to build and run a standalone MATLAB application which uses the Zaber Motion Library toolbox.
 The source code for the application is in `src/main.m`.
 
